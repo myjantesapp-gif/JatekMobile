@@ -1,5 +1,8 @@
 packages:
-  - artifacts/*
+  - artifacts/api-server
+  - artifacts/backend-dashboard
+  - artifacts/jatek-landing
+  - artifacts/jatek-mobile
   - lib/*
   - lib/integrations/*
   - scripts
