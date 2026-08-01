@@ -35,7 +35,10 @@ export function WaveEdge({ color, gradientStops, height = 28 }: Props) {
     <View
       style={[
         styles.wrap,
-        { bottom: -(H - 1), height: H, pointerEvents: "none" },
+        // Overlap by 2px instead of 1 — prevents sub-pixel gap on high-DPI
+        // (3× Android OLED / Retina) where 1px rounds to 0.33px and leaves
+        // a visible colour seam between the header and the wave fill.
+        { bottom: -(H - 2), height: H + 2, pointerEvents: "none" },
       ]}
     >
       <Svg

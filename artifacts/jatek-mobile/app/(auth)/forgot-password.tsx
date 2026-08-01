@@ -1,13 +1,18 @@
 import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
+import {
+  View, Text, TextInput, TouchableOpacity, StyleSheet,
+  ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView,
+} from "react-native";
 import { router } from "expo-router";
 import { useColors } from "@/hooks/useColors";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getApiBaseSafe } from "@/lib/apiBase";
 
 type Step = "email" | "code" | "newPassword" | "done";
 
 export default function ForgotPasswordScreen() {
   const colors = useColors();
+  const insets = useSafeAreaInsets();
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -61,8 +66,9 @@ export default function ForgotPasswordScreen() {
   };
 
   const s = StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24 },
-    inner: { flex: 1, justifyContent: "center", gap: 24 },
+    flex: { flex: 1, backgroundColor: colors.background },
+    scroll: { flexGrow: 1, justifyContent: "center" },
+    inner: { paddingHorizontal: 24, paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24, gap: 18 },
     title: { fontSize: 28, fontWeight: "800", color: colors.foreground, textAlign: "center" },
     subtitle: { fontSize: 15, color: colors.mutedForeground, textAlign: "center", lineHeight: 22 },
     input: {
@@ -71,95 +77,117 @@ export default function ForgotPasswordScreen() {
       backgroundColor: colors.card,
     },
     btn: {
-      backgroundColor: colors.primary, borderRadius: 14, padding: 16,
+      backgroundColor: colors.primary, borderRadius: 14, paddingVertical: 16,
       alignItems: "center", marginTop: 4,
+      shadowColor: colors.primary, shadowOpacity: 0.3, shadowRadius: 12,
+      shadowOffset: { width: 0, height: 4 }, elevation: 6,
     },
     btnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
-    back: { alignItems: "center", marginTop: 8 },
+    back: { alignItems: "center", paddingVertical: 8 },
     backText: { color: colors.primary, fontSize: 14, fontWeight: "600" },
     error: { color: "#EF4444", fontSize: 13, textAlign: "center", backgroundColor: "#FEF2F2", borderRadius: 10, padding: 10 },
     successIcon: { fontSize: 64, textAlign: "center" },
   });
 
   return (
-    <KeyboardAvoidingView style={s.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <View style={s.inner}>
-        {step === "email" && (
-          <>
-            <Text style={s.title}>Mot de passe oublié ?</Text>
-            <Text style={s.subtitle}>Entrez votre adresse e-mail. Nous vous enverrons un lien de réinitialisation.</Text>
-            {error ? <Text style={s.error}>{error}</Text> : null}
-            <TextInput
-              style={s.input}
-              placeholder="votre@email.com"
-              placeholderTextColor={colors.mutedForeground}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              value={email}
-              onChangeText={setEmail}
-              onSubmitEditing={handleSendCode}
-            />
-            <TouchableOpacity style={s.btn} onPress={handleSendCode} disabled={loading}>
-              {loading ? <ActivityIndicator color="#fff" /> : <Text style={s.btnText}>Envoyer le code</Text>}
-            </TouchableOpacity>
-            <TouchableOpacity style={s.back} onPress={() => router.back()}>
-              <Text style={s.backText}>← Retour à la connexion</Text>
-            </TouchableOpacity>
-          </>
-        )}
+    <KeyboardAvoidingView
+      style={s.flex}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView
+        contentContainerStyle={s.scroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={s.inner}>
+          {step === "email" && (
+            <>
+              <Text style={s.title}>Mot de passe oublié ?</Text>
+              <Text style={s.subtitle}>
+                Entrez votre adresse e-mail. Nous vous enverrons un lien de réinitialisation.
+              </Text>
+              {error ? <Text style={s.error}>{error}</Text> : null}
+              <TextInput
+                style={s.input}
+                placeholder="votre@email.com"
+                placeholderTextColor={colors.mutedForeground}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                value={email}
+                onChangeText={setEmail}
+                onSubmitEditing={handleSendCode}
+                returnKeyType="done"
+              />
+              <TouchableOpacity style={s.btn} onPress={handleSendCode} disabled={loading}>
+                {loading ? <ActivityIndicator color="#fff" /> : <Text style={s.btnText}>Envoyer le code</Text>}
+              </TouchableOpacity>
+              <TouchableOpacity style={s.back} onPress={() => router.back()}>
+                <Text style={s.backText}>← Retour à la connexion</Text>
+              </TouchableOpacity>
+            </>
+          )}
 
-        {step === "code" && (
-          <>
-            <Text style={s.title}>Vérification</Text>
-            <Text style={s.subtitle}>Un code a été envoyé à {email}. Entrez-le ci-dessous et choisissez un nouveau mot de passe.</Text>
-            {error ? <Text style={s.error}>{error}</Text> : null}
-            <TextInput
-              style={s.input}
-              placeholder="Code de vérification"
-              placeholderTextColor={colors.mutedForeground}
-              keyboardType="default"
-              autoCapitalize="none"
-              value={code}
-              onChangeText={setCode}
-            />
-            <TextInput
-              style={s.input}
-              placeholder="Nouveau mot de passe (min. 8 caractères)"
-              placeholderTextColor={colors.mutedForeground}
-              secureTextEntry
-              value={newPassword}
-              onChangeText={setNewPassword}
-            />
-            <TextInput
-              style={s.input}
-              placeholder="Confirmer le mot de passe"
-              placeholderTextColor={colors.mutedForeground}
-              secureTextEntry
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              onSubmitEditing={handleVerifyAndReset}
-            />
-            <TouchableOpacity style={s.btn} onPress={handleVerifyAndReset} disabled={loading}>
-              {loading ? <ActivityIndicator color="#fff" /> : <Text style={s.btnText}>Réinitialiser le mot de passe</Text>}
-            </TouchableOpacity>
-            <TouchableOpacity style={s.back} onPress={() => setStep("email")}>
-              <Text style={s.backText}>← Renvoyer le code</Text>
-            </TouchableOpacity>
-          </>
-        )}
+          {step === "code" && (
+            <>
+              <Text style={s.title}>Vérification</Text>
+              <Text style={s.subtitle}>
+                Un code a été envoyé à {email}. Entrez-le ci-dessous et choisissez un nouveau mot de passe.
+              </Text>
+              {error ? <Text style={s.error}>{error}</Text> : null}
+              <TextInput
+                style={s.input}
+                placeholder="Code de vérification"
+                placeholderTextColor={colors.mutedForeground}
+                keyboardType="default"
+                autoCapitalize="none"
+                value={code}
+                onChangeText={setCode}
+              />
+              <TextInput
+                style={s.input}
+                placeholder="Nouveau mot de passe (min. 8 caractères)"
+                placeholderTextColor={colors.mutedForeground}
+                secureTextEntry
+                value={newPassword}
+                onChangeText={setNewPassword}
+              />
+              <TextInput
+                style={s.input}
+                placeholder="Confirmer le mot de passe"
+                placeholderTextColor={colors.mutedForeground}
+                secureTextEntry
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                onSubmitEditing={handleVerifyAndReset}
+                returnKeyType="done"
+              />
+              <TouchableOpacity style={s.btn} onPress={handleVerifyAndReset} disabled={loading}>
+                {loading
+                  ? <ActivityIndicator color="#fff" />
+                  : <Text style={s.btnText}>Réinitialiser le mot de passe</Text>
+                }
+              </TouchableOpacity>
+              <TouchableOpacity style={s.back} onPress={() => setStep("email")}>
+                <Text style={s.backText}>← Renvoyer le code</Text>
+              </TouchableOpacity>
+            </>
+          )}
 
-        {step === "done" && (
-          <>
-            <Text style={s.successIcon}>✅</Text>
-            <Text style={s.title}>Mot de passe mis à jour !</Text>
-            <Text style={s.subtitle}>Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.</Text>
-            <TouchableOpacity style={s.btn} onPress={() => router.replace("/(auth)/login")}>
-              <Text style={s.btnText}>Se connecter</Text>
-            </TouchableOpacity>
-          </>
-        )}
-      </View>
+          {step === "done" && (
+            <>
+              <Text style={s.successIcon}>✅</Text>
+              <Text style={s.title}>Mot de passe mis à jour !</Text>
+              <Text style={s.subtitle}>
+                Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.
+              </Text>
+              <TouchableOpacity style={s.btn} onPress={() => router.replace("/(auth)/login")}>
+                <Text style={s.btnText}>Se connecter</Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }

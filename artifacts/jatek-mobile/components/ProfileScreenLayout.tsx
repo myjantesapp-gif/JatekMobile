@@ -67,7 +67,7 @@ export default function ProfileScreenLayout({ title, children, scroll = true, he
     return <View style={{ flex: 1, backgroundColor: colors.background }}>{Body}</View>;
   }
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.background }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.background }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       {Body}
     </KeyboardAvoidingView>
   );
