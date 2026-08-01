@@ -241,13 +241,6 @@ export default function HomeScreen() {
   const [activeBusinessType, setActiveBusinessType] = useState("restaurant");
   const [activeLabel, setActiveLabel] = useState("Tous les Restaurants");
 
-  // Derive restaurant category slug dynamically from API so we never hardcode "restauration".
-  const restaurantCategorySlug = useMemo(() => {
-    const cat = (apiCategories ?? []).find(
-      (c: any) => !c.parentId && c.isActive !== false && c.businessType === "restaurant",
-    ) as any;
-    return cat?.slug ?? null;
-  }, [apiCategories]);
   const [onlyOpen, setOnlyOpen] = useState<boolean | undefined>(undefined);
   const [addressPickerOpen, setAddressPickerOpen] = useState(false);
   const [shortsVisible, setShortsVisible] = useState(false);
@@ -265,6 +258,14 @@ export default function HomeScreen() {
   const { data: restaurants, isLoading } = useListRestaurants(params);
   const { data: featuredPartners } = useGetFeaturedRestaurants();
   const { data: apiCategories, isLoading: categoriesLoading } = useListCategories();
+
+  // Derive restaurant category slug dynamically from API so we never hardcode "restauration".
+  const restaurantCategorySlug = useMemo(() => {
+    const cat = (apiCategories ?? []).find(
+      (c: any) => !c.parentId && c.isActive !== false && c.businessType === "restaurant",
+    ) as any;
+    return cat?.slug ?? null;
+  }, [apiCategories]);
 
   // Categories are 100% managed from the admin dashboard (ma.jatek.app/admin).
   // No hardcoded fallback: while loading we show a spinner, if empty a message.
@@ -402,7 +403,12 @@ export default function HomeScreen() {
               <View style={[s.shopCatTile, { backgroundColor: c.accent + "1A" }]}>
                 <Ionicons name={c.icon} size={34} color={c.accent} />
               </View>
-              <Text style={[s.shopCatLabel, { color: c.accent }]} numberOfLines={1}>
+              <Text
+                style={[s.shopCatLabel, { color: c.accent }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.65}
+              >
                 {c.label}
               </Text>
             </Pressable>
@@ -686,7 +692,7 @@ const s = StyleSheet.create({
   shopCatItem: {
     alignItems: "center",
     gap: 8,
-    width: 90,
+    width: 84,
   },
   shopCatTile: {
     width: 70,

@@ -9,12 +9,28 @@ const router: IRouter = Router();
 // Categories (public read)
 // ─────────────────────────────────────────────────────────────
 
-router.get("/categories", async (_req, res): Promise<void> => {
-  const all = await db.select().from(categoriesTable).where(eq(categoriesTable.isActive, true)).orderBy(asc(categoriesTable.sortOrder));
-  const parents = all.filter((c) => !c.parentId);
+router.get("/categories", async (req, res): Promise<void> => {
+  // Support optional filters: ?type=service_shortcut|category, ?businessType=restaurant, ?parentId=123, ?isActive=true|false
+  const { type: typeFilter, businessType: btFilter, parentId: parentIdFilter } = req.query as Record<string, string | undefined>;
+
+  const all = await db.select().from(categoriesTable)
+    .where(eq(categoriesTable.isActive, true))
+    .orderBy(asc(categoriesTable.sortOrder));
+
+  // Apply optional filters on the in-memory result (table is small)
+  let filtered = all;
+  if (typeFilter) filtered = filtered.filter((c) => c.type === typeFilter);
+  if (btFilter)   filtered = filtered.filter((c) => c.businessType === btFilter);
+  if (parentIdFilter !== undefined) {
+    const pid = parentIdFilter === "null" || parentIdFilter === "" ? null : Number(parentIdFilter);
+    filtered = filtered.filter((c) => c.parentId === pid);
+  }
+
+  // Build hierarchy: parents with nested subCategories[]
+  const parents = filtered.filter((c) => !c.parentId);
   const result = parents.map((p) => ({
     ...p,
-    subCategories: all.filter((c) => c.parentId === p.id),
+    subCategories: all.filter((c) => c.parentId === p.id && c.isActive),
   }));
   res.json(result);
 });

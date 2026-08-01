@@ -109,20 +109,21 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       style={[styles.flex, { backgroundColor: colors.background }]}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "android" ? 0 : 0}
     >
       <ScrollView
         contentContainerStyle={[styles.container, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }]}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Back button (top-left) */}
+        {/* Back button — positioned below the status bar / notch using safe area inset */}
         <TouchableOpacity
           onPress={() => {
             if (Platform.OS !== "web") Haptics.selectionAsync();
             if (router.canGoBack()) router.back();
             else router.replace("/(auth)/welcome");
           }}
-          style={[styles.backBtn, { backgroundColor: colors.muted }]}
+          style={[styles.backBtn, { backgroundColor: colors.muted, top: insets.top + 12 }]}
           hitSlop={10}
           activeOpacity={0.7}
         >
