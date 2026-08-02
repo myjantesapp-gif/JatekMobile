@@ -2,12 +2,10 @@
 module.exports = ({ config }) => {
   const slug = process.env.EXPO_SLUG ?? "jatek-mobile";
   const owner = process.env.EXPO_OWNER ?? "myjantes";
-  // Canonical project ID for myjantesapps-team/jatekclient on expo.dev
-  // Override via EXPO_PUBLIC_PROJECT_ID env var (already set in every eas.json profile).
   const projectId =
     process.env.EXPO_PUBLIC_PROJECT_ID ??
     process.env.DEFAULT_PROJECT_ID ??
-    "11e89fef-b97e-4823-ba4a-07c2942ba6b0";
+    "24f32081-ec5b-4040-9694-24e08de7e7c7";
 
   return {
     ...config,

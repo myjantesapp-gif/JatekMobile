@@ -135,13 +135,9 @@ export default function OtpScreen() {
     return (
       <KeyboardAvoidingView
         style={[styles.flex, { backgroundColor: colors.background }]}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <ScrollView
-          contentContainerStyle={[styles.nameContainer, { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 24 }]}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
+        <View style={[styles.nameContainer, { paddingTop: insets.top + 40 }]}>
           <View style={[styles.successIcon, { backgroundColor: (colors as any).success + "20" || "#22C55E20" }]}>
             <Ionicons name="checkmark-circle" size={40} color={(colors as any).success || "#22C55E"} />
           </View>
@@ -165,7 +161,7 @@ export default function OtpScreen() {
             <Text style={styles.btnText}>{t("otp_start")}</Text>
             <Ionicons name="arrow-forward" size={20} color="#fff" />
           </TouchableOpacity>
-        </ScrollView>
+        </View>
       </KeyboardAvoidingView>
     );
   }
@@ -173,7 +169,7 @@ export default function OtpScreen() {
   return (
     <KeyboardAvoidingView
       style={[styles.flex, { backgroundColor: colors.background }]}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
         contentContainerStyle={[styles.container, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 24 }]}
@@ -266,7 +262,7 @@ export default function OtpScreen() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   container: { flexGrow: 1, paddingHorizontal: 24, alignItems: "center" },
-  nameContainer: { flexGrow: 1, paddingHorizontal: 24, alignItems: "center", gap: 16 },
+  nameContainer: { flex: 1, paddingHorizontal: 24, alignItems: "center", gap: 16 },
   back: { alignSelf: "flex-start", padding: 4, marginBottom: 16 },
   channelBadge: {
     flexDirection: "row", alignItems: "center", gap: 6,

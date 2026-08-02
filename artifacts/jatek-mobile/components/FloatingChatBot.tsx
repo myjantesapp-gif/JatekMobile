@@ -265,7 +265,7 @@ export default function FloatingChatBot() {
         <View style={s.backdrop}>
           <TouchableOpacity style={StyleSheet.absoluteFill} onPress={handleClose} />
           <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
             style={s.sheet}
           >
             <SafeAreaView style={s.sheetInner}>
