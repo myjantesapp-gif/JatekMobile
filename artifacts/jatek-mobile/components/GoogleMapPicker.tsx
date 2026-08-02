@@ -12,7 +12,12 @@ interface Props {
   zoneColor?: string;
 }
 
-const GOOGLE_KEY = (process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY ?? process.env.EXPO_PUBLIC_GOOGLE_PLACES_KEY ?? "").trim();
+const GOOGLE_KEY = (
+  process.env.EXPO_PUBLIC_GOOGLE_API_KEY ??
+  process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY ??
+  process.env.EXPO_PUBLIC_GOOGLE_PLACES_KEY ??
+  ""
+).trim();
 
 function buildGoogleHtml(lat: number, lng: number, pin: string, zone: string) {
   return `<!DOCTYPE html>

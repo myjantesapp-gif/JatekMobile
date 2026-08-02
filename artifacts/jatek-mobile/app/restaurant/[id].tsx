@@ -23,7 +23,12 @@ const SIDE = 16;
 const COL_GAP = 12;
 const COL_W = (SCREEN_W - SIDE * 2 - COL_GAP) / 2;
 const HERO_H = 240;
-const GOOGLE_KEY = (process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY ?? process.env.EXPO_PUBLIC_GOOGLE_PLACES_KEY ?? "").trim();
+const GOOGLE_KEY = (
+  process.env.EXPO_PUBLIC_GOOGLE_API_KEY ??
+  process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY ??
+  process.env.EXPO_PUBLIC_GOOGLE_PLACES_KEY ??
+  ""
+).trim();
 
 function buildRestaurantMapHtml(lat: number, lng: number, name: string): string {
   const safeName = name.replace(/'/g, "\\'");

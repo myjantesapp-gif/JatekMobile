@@ -41,10 +41,22 @@ module.exports = ({ config }) => {
       permissions: [
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
       ],
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
         backgroundColor: "#FCB2D3",
+      },
+      // Embed Google Maps API key in the native Android manifest
+      // Required for react-native-maps AND for WebView-based Google Maps JS API
+      config: {
+        googleMaps: {
+          apiKey:
+            process.env.EXPO_PUBLIC_GOOGLE_API_KEY ??
+            process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY ??
+            "",
+        },
       },
     },
     web: {

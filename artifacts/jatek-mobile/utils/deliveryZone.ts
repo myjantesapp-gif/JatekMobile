@@ -58,7 +58,12 @@ export function checkDeliveryZone(
   return { inZone: distanceKm <= MAX_RADIUS_KM, distanceKm };
 }
 
-const GOOGLE_PLACES_KEY = (process.env.EXPO_PUBLIC_GOOGLE_PLACES_KEY ?? "").trim();
+const GOOGLE_PLACES_KEY = (
+  process.env.EXPO_PUBLIC_GOOGLE_API_KEY ??
+  process.env.EXPO_PUBLIC_GOOGLE_PLACES_KEY ??
+  process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY ??
+  ""
+).trim();
 const useGoogle = GOOGLE_PLACES_KEY.length > 0;
 
 /**

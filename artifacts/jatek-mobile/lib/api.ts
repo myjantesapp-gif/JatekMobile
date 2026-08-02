@@ -152,7 +152,12 @@ export async function getDriverLocation(driverId: number): Promise<{ latitude: n
  * slow third-party call can never freeze the UI.
  */
 export async function geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
-  const googleKey = (process.env.EXPO_PUBLIC_GOOGLE_PLACES_KEY ?? process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY ?? "").trim();
+  const googleKey = (
+    process.env.EXPO_PUBLIC_GOOGLE_API_KEY ??
+    process.env.EXPO_PUBLIC_GOOGLE_PLACES_KEY ??
+    process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY ??
+    ""
+  ).trim();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 8_000);
 

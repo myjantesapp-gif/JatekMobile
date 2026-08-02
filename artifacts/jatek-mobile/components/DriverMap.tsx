@@ -28,7 +28,12 @@ interface Props {
   driverColor?: string;
 }
 
-const GOOGLE_KEY = (process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY ?? process.env.EXPO_PUBLIC_GOOGLE_PLACES_KEY ?? "").trim();
+const GOOGLE_KEY = (
+  process.env.EXPO_PUBLIC_GOOGLE_API_KEY ??
+  process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY ??
+  process.env.EXPO_PUBLIC_GOOGLE_PLACES_KEY ??
+  ""
+).trim();
 
 function buildGoogleHtml(
   driverLat: number,
@@ -251,7 +256,6 @@ function buildLeafletHtml(
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   html,body,#map{width:100%;height:100%}
@@ -260,7 +264,9 @@ function buildLeafletHtml(
 <body>
 <div id="map"></div>
 <script>
-  var map=L.map('map',{zoomControl:false,attributionControl:false});
+  function bootLeaflet(){
+    if(typeof L === 'undefined'){ setTimeout(bootLeaflet, 80); return; }
+    var map=L.map('map',{zoomControl:false,attributionControl:false});
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,subdomains:['a','b','c']}).addTo(map);
 
   var driverIcon=L.divIcon({
@@ -297,7 +303,9 @@ function buildLeafletHtml(
   document.addEventListener('message',function(ev){handleMsg(ev.data);});
   setTimeout(function(){map.invalidateSize();},150);
   setTimeout(function(){map.invalidateSize();},600);
+  } // end bootLeaflet
 </script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" onload="bootLeaflet()" onerror="document.getElementById('map').innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:13px;color:#666;font-family:-apple-system,sans-serif;\\'>Carte indisponible</div>'"></script>
 </body>
 </html>`;
 }
@@ -366,6 +374,16 @@ export function DriverMap({
         scrollEnabled={false}
         originWhitelist={["*"]}
         javaScriptEnabled
+        domStorageEnabled
+        mixedContentMode="always"
+        allowsInlineMediaPlayback
+        setSupportMultipleWindows={false}
+        onMessage={(e) => {
+          try {
+            const d = JSON.parse(e.nativeEvent.data);
+            if (d?.type === "route_info") { /* handled upstream */ }
+          } catch { /* ignore */ }
+        }}
       />
     </View>
   );

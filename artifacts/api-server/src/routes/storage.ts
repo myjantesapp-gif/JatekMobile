@@ -1,5 +1,9 @@
 import { Router, type IRouter, type Response } from "express";
 import { Readable } from "stream";
+import fs from "fs";
+import path from "path";
+import multer from "multer";
+import { randomUUID } from "crypto";
 import {
   RequestUploadUrlBody,
   RequestUploadUrlResponse,
@@ -17,6 +21,25 @@ const ALLOWED_IMAGE_TYPES = new Set([
   "image/webp",
   "image/gif",
 ]);
+
+// ─── Local uploads directory ───────────────────────────────────────────────
+const LOCAL_UPLOADS_DIR = path.resolve(process.cwd(), "uploads");
+if (!fs.existsSync(LOCAL_UPLOADS_DIR)) {
+  fs.mkdirSync(LOCAL_UPLOADS_DIR, { recursive: true });
+}
+
+// multer: keep file in memory so we can write it to both disk and bucket
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_UPLOAD_BYTES },
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_IMAGE_TYPES.has(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Unsupported file type. Allowed: JPEG, PNG, WebP, GIF."));
+    }
+  },
+});
 
 /**
  * POST /storage/uploads/request-url
@@ -68,6 +91,54 @@ router.post(
     } catch (error) {
       req.log.error({ err: error }, "Error generating upload URL");
       res.status(500).json({ error: "Failed to generate upload URL" });
+    }
+  },
+);
+
+/**
+ * POST /storage/uploads/server
+ *
+ * Server-side upload: receives a multipart file, saves it to the local
+ * `./uploads/` directory AND uploads it to the Replit object-storage bucket
+ * in parallel. Returns both paths so callers can use either.
+ *
+ * Restricted to admins and restaurant owners (same as presigned-URL flow).
+ */
+router.post(
+  "/storage/uploads/server",
+  requireRole("admin", "super_admin", "manager", "restaurant_owner"),
+  upload.single("file"),
+  async (req: AuthedRequest, res: Response) => {
+    try {
+      if (!req.file) {
+        res.status(400).json({ error: "No file uploaded." });
+        return;
+      }
+
+      const { buffer, mimetype, originalname } = req.file;
+      const objectId = randomUUID();
+      const ext = originalname.split(".").pop() ?? "bin";
+      const localFileName = `${objectId}.${ext}`;
+      const localFilePath = path.join(LOCAL_UPLOADS_DIR, localFileName);
+
+      // Save locally and upload to bucket in parallel
+      const [bucketPath] = await Promise.all([
+        objectStorageService.uploadBuffer(buffer, mimetype, objectId).catch((err) => {
+          req.log.warn({ err }, "Bucket upload failed, returning local path only");
+          return null;
+        }),
+        fs.promises.writeFile(localFilePath, buffer),
+      ]);
+
+      res.json({
+        localPath: `/uploads/${localFileName}`,
+        bucketPath: bucketPath ?? null,
+        objectPath: bucketPath ?? `/uploads/${localFileName}`,
+        metadata: { name: originalname, size: buffer.length, contentType: mimetype },
+      });
+    } catch (error) {
+      req.log.error({ err: error }, "Server-side upload failed");
+      res.status(500).json({ error: "Upload failed" });
     }
   },
 );

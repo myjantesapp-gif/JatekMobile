@@ -145,6 +145,25 @@ export class ObjectStorageService {
     return objectFile;
   }
 
+  /**
+   * Upload a buffer directly to the bucket and return the normalised object path.
+   * Used by the server-side upload endpoint (multer) so we can save the file
+   * both locally and in the bucket in a single request.
+   */
+  async uploadBuffer(
+    buffer: Buffer,
+    contentType: string,
+    objectId: string = randomUUID(),
+  ): Promise<string> {
+    const privateObjectDir = this.getPrivateObjectDir();
+    const fullPath = `${privateObjectDir}/uploads/${objectId}`;
+    const { bucketName, objectName } = parseObjectPath(fullPath);
+    const bucket = objectStorageClient.bucket(bucketName);
+    const file = bucket.file(objectName);
+    await file.save(buffer, { contentType, resumable: false });
+    return `/objects/uploads/${objectId}`;
+  }
+
   normalizeObjectEntityPath(rawPath: string): string {
     if (!rawPath.startsWith("https://storage.googleapis.com/")) {
       return rawPath;

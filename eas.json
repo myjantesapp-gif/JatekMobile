@@ -30,7 +30,8 @@
         "EXPO_PUBLIC_PROJECT_ID": "11e89fef-b97e-4823-ba4a-07c2942ba6b0",
         "PNPM_VERSION": "10.26.1",
         "EXPO_OWNER": "myjantesapps-team",
-        "EXPO_SLUG": "jatekclient"
+        "EXPO_SLUG": "jatekclient",
+        "EXPO_PUBLIC_GOOGLE_API_KEY": "$EXPO_PUBLIC_GOOGLE_API_KEY"
       },
       "android": {
         "buildType": "apk"
@@ -45,7 +46,8 @@
         "EXPO_PUBLIC_PROJECT_ID": "11e89fef-b97e-4823-ba4a-07c2942ba6b0",
         "PNPM_VERSION": "10.26.1",
         "EXPO_OWNER": "myjantesapps-team",
-        "EXPO_SLUG": "jatekclient"
+        "EXPO_SLUG": "jatekclient",
+        "EXPO_PUBLIC_GOOGLE_API_KEY": "$EXPO_PUBLIC_GOOGLE_API_KEY"
       },
       "android": {
         "buildType": "app-bundle"
