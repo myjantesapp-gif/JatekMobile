@@ -50,6 +50,11 @@
       "android": {
         "buildType": "app-bundle"
       }
+    },
+    "pprod1": {
+      "env": {
+        "NPM_CONFIG_FROZEN_LOCKFILE": "false"
+      }
     }
   },
   "submit": {
